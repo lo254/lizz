@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASMTTI Voting System</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI',sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: #1a2a6c;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .logo-circle {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 80%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 20px;
+            color: #1a2a6c;
+            margin-right: 15px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .tab-container {
+            display: flex;
+            background: #f1f1f1;
+        }
+        
+        .tab {
+            padding: 15px 20px;
+            cursor: pointer;
+            flex: 1;
+            text-align: center;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .tab.active {
+            background: #fff;
+            border-bottom: 3px solid gold;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 30px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        
+        button {
+            background: #1a2a6c;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #2a3b8c;
+        }
+        
+        .candidates {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .candidate {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .candidate:hover {
+            transform: translateY(-5px);
+        }
+        
+        .candidate.selected {
+            border: 3px solid #1a2a6c;
+        }
+        
+        .candidate-img {
+            width: 100%;
+            height: 160px;
+            background: #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 64px;
+            color: #777;
+        }
+        
+        .candidate-name {
+            padding: 15px 10px;
+            font-weight: bold;
+            background-color: grey;
+        }
+        
+        .results {
+            margin-top: 30px;
+        }
+        
+        .result-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .result-bar {
+            height: 20px;
+            background: #1a2a6c;
+            border-radius: 10px;
+            margin-top: 5px;
+        }
+        
+        .winner {
+            text-align: center;
+            padding: 20px;
+            background: gold;
+            border-radius: 10px;
+            margin-top: 30px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .admin-section {
+            border-top: 2px solid #ddd;
+            padding-top: 30px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-circle">ASMTTI</div>
+                <div>
+                    <h1>ASMTTI Voting System</h1>
+                    <p>Select your candidate for student leadership</p>
+                </div>
+            </div>
+        </header>
+        
+        <div class="tab-container">
+            <div class="tab active" onclick="showTab('voter')">Voter Login</div>
+            <div class="tab" onclick="showTab('vote')">Cast Your Vote</div>
+            <div class="tab" onclick="showTab('admin')">Admin Login</div>
+        </div>
+        
+        <div class="content">
+            <!-- Voter Login Section -->
+            <div id="voter-section">
+                <h2>Voter Verification</h2>
+                <p>Please enter your name and admission number to verify your eligibility to vote.</p>
+                
+                <div class="form-group">
+                    <label for="voter-name">Full Name</label>
+                    <input type="text" id="voter-name" placeholder="Enter your full name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="admission-number">Admission Number</label>
+                    <input type="text" id="admission-number" placeholder="Enter admission number">
+                </div>
+                
+                <button onclick="verifyVoter()">Verify and Proceed to Vote</button>
+            </div>
+            
+            <!-- Voting Section -->
+            <div id="vote-section" class="hidden">
+                <h2>Select Your Candidate</h2>
+                <p>Click on your preferred candidate to select them</p>
+                
+                <div class="candidates">
+                    <div class="candidate" onclick="selectCandidate(1)">
+                        <div class="candidate-img"><img src="https://lh3.googleusercontent.com/pw/AP1GczMoyoRTTkndVRX66C3x5qtxn5I2a1HaLTOkWPaZGb8VAFGpiq7zGnVc8UZ5lXjDSk5kpxZ2HIwg-Y-D6qqaTUtKa5Qk9DZgBShOdDa2scIkwIWuqiChGgsZWDq7Cv-g6L9e0VY8fZLhWSW2Aq4Bc3EAuA=w612-h408-s-no-gm?authuser=0" alt="no internet">
+</div>
+                        <div class="candidate-name" style="background-color: black;">John Omondi</div>
+                    </div>
+                    
+                    <div class="candidate" onclick="selectCandidate(2)">
+                        <div class="candidate-img">👩‍💼</div>
+                        <div class="candidate-name">Mary Wanjiku</div>
+                    </div>
+                    
+                    <div class="candidate" onclick="selectCandidate(3)">
+                        <div class="candidate-img">👨‍💼</div>
+                        <div class="candidate-name">James Otieno</div>
+                    </div>
+                    
+                    <div class="candidate" onclick="selectCandidate(4)">
+                        <div class="candidate-img">👩‍💼</div>
+                        <div class="candidate-name">Susan Atieno</div>
+                    </div>
+                </div>
+                
+                <button onclick="castVote()" style="margin-top: 30px; width: 100%;">Cast Vote</button>
+            </div>
+            
+            <!-- Admin Login Section -->
+            <div id="admin-login-section" class="hidden">
+                <h2>Admin Login</h2>
+                <p>Enter admin credentials to view election results</p>
+                
+                <div class="form-group">
+                    <label for="admin-username">Username</label>
+                    <input type="text" id="admin-username" placeholder="Admin username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="admin-password">Password</label>
+                    <input type="password" id="admin-password" placeholder="Admin password">
+                </div>
+		<div>
+		     <p style="color:#1a2a6c;"><b> hint😎: </p>
+		    <p style="color:skyblue;">username: admin </p>
+	    	    <p style="color:skyblue;"> pass: 1234 </p>
+		</div><br>
+                
+                
+                <button onclick="adminLogin()">View Results</button>
+            </div>
+            
+            <!-- Results Section -->
+            <div id="results-section" class="hidden">
+                <h2>Election Results</h2>
+                <p>Current voting results (only visible to admin)</p>
+                
+                <div class="results">
+                    <div class="result-item">
+                        <div>John Omondi</div>
+                        <div><span id="candidate1-votes">0</span> votes</div>
+                    </div>
+                    <div class="result-bar" id="candidate1-bar" style="width: 0%"></div>
+                    
+                    <div class="result-item">
+                        <div>Mary Wanjiku</div>
+                        <div><span id="candidate2-votes">0</span> votes</div>
+                    </div>
+                    <div class="result-bar" id="candidate2-bar" style="width: 0%"></div>
+                    
+                    <div class="result-item">
+                        <div>James Otieno</div>
+                        <div><span id="candidate3-votes">0</span> votes</div>
+                    </div>
+                    <div class="result-bar" id="candidate3-bar" style="width: 0%"></div>
+                    
+                    <div class="result-item">
+                        <div>Susan Atieno</div>
+                        <div><span id="candidate4-votes">0</span> votes</div>
+                    </div>
+                    <div class="result-bar" id="candidate4-bar" style="width: 0%"></div>
+                </div>
+                
+                <div id="winner-section" class="winner hidden">
+                    <h2>Winner: <span id="winner-name"></span></h2>
+                    <p>Congratulations!</p>
+                </div>
+                
+                <div class="admin-section">
+                    <h3>Admin Tools</h3>
+                    <button onclick="resetVoting()">Reset Voting</button>
+                    <button onclick="addSampleVoters()">Add Sample Voters</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        let voters = [
+            { name: "elizabeth wandera", admission: "0001", voted: false },
+            { name: "augustine mutua", admission: "0001", voted: false },
+            { name: "musab said", admission: "0001", voted: false },
+            { name: "ndinda kiminza", admission: "0001", voted: false },
+            { name: "milton mwakio", admission: "0001", voted: false }
+        ];
+        
+        let candidates = [
+            { id: 1, name: "John Omondi", votes: 0 },
+            { id: 2, name: "Mary Wanjiku", votes: 0 },
+            { id: 3, name: "James Otieno", votes: 0 },
+            { id: 4, name: "Susan Atieno", votes: 0 }
+        ];
+        
+        let currentVoter = null;
+        let selectedCandidate = null;
+        
+        // Load data from localStorage if available
+        function loadData() {
+            const savedVoters = localStorage.getItem('asmittiVoters');
+            const savedCandidates = localStorage.getItem('asmittiCandidates');
+            
+            if (savedVoters) voters = JSON.parse(savedVoters);
+            if (savedCandidates) candidates = JSON.parse(savedCandidates);
+        }
+        
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('asmittiVoters', JSON.stringify(voters));
+            localStorage.setItem('asmittiCandidates', JSON.stringify(candidates));
+        }
+        
+        // Show the selected tab
+        function showTab(tabName) {
+            document.getElementById('voter-section').classList.add('hidden');
+            document.getElementById('vote-section').classList.add('hidden');
+            document.getElementById('admin-login-section').classList.add('hidden');
+            document.getElementById('results-section').classList.add('hidden');
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            if (tabName === 'voter') {
+                document.getElementById('voter-section').classList.remove('hidden');
+                document.querySelector('.tab:nth-child(1)').classList.add('active');
+            } else if (tabName === 'vote') {
+                document.getElementById('vote-section').classList.remove('hidden');
+                document.querySelector('.tab:nth-child(2)').classList.add('active');
+            } else if (tabName === 'admin') {
+                document.getElementById('admin-login-section').classList.remove('hidden');
+                document.querySelector('.tab:nth-child(3)').classList.add('active');
+            }
+        }
+        
+        // Verify voter eligibility
+        function verifyVoter() {
+            const name = document.getElementById('voter-name').value.trim();
+            const admission = document.getElementById('admission-number').value.trim();
+            
+            if (!name || !admission) {
+                alert('Please enter both name and admission number');
+                return;
+            }
+            
+            const voter = voters.find(v => 
+                v.name.toLowerCase() === name.toLowerCase() && 
+                v.admission.toLowerCase() === admission.toLowerCase()
+            );
+            
+            if (!voter) {
+                alert('You are not registered as an eligible voter. Please contact admin.');
+                return;
+            }
+            
+            if (voter.voted) {
+                alert('You have already voted. Each voter can only vote once.');
+                return;
+            }
+            
+            currentVoter = voter;
+            showTab('vote');
+        }
+        
+        // Select a candidate
+        function selectCandidate(candidateId) {
+            selectedCandidate = candidateId;
+            
+            // Update UI to show selection
+            document.querySelectorAll('.candidate').forEach(candidate => {
+                candidate.classList.remove('selected');
+            });
+            
+            document.querySelector(`.candidate:nth-child(${candidateId})`).classList.add('selected');
+        }
+        
+        // Cast vote
+        function castVote() {
+            if (!selectedCandidate) {
+                alert('Please select a candidate before voting');
+                return;
+            }
+            
+            // Update candidate vote count
+            const candidate = candidates.find(c => c.id === selectedCandidate);
+            if (candidate) {
+                candidate.votes++;
+            }
+            
+            // Mark voter as voted
+            const voterIndex = voters.findIndex(v => v.name === currentVoter.name);
+            if (voterIndex !== -1) {
+                voters[voterIndex].voted = true;
+            }
+            
+            // Save data
+            saveData();
+            
+            alert('Thank you for voting! Your vote has been recorded.');
+            
+            // Reset for next voter
+            document.getElementById('voter-name').value = '';
+            document.getElementById('admission-number').value = '';
+            selectedCandidate = null;
+            currentVoter = null;
+            
+            showTab('voter');
+        }
+        
+        // Admin login
+        function adminLogin() {
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            
+            // Simple admin credentials (in a real system, this would be more secure)
+            if (username === 'admin' && password === '1234') {
+                showResults();
+            } else {
+                alert('Invalid admin credentials');
+            }
+        }
+        
+        // Show results
+        function showResults() {
+            // Update result counts
+            for (let i = 0; i < candidates.length; i++) {
+                document.getElementById(`candidate${i+1}-votes`).textContent = candidates[i].votes;
+                
+                // Calculate percentage for bar width (with max 80% for visual appearance)
+                const totalVotes = candidates.reduce((sum, candidate) => sum + candidate.votes, 1);
+                const percentage = (candidates[i].votes / totalVotes) * 80;
+                document.getElementById(`candidate${i+1}-bar`).style.width = `${percentage}%`;
+            }
+            
+            // Determine winner
+            let maxVotes = 0;
+            let winner = null;
+            
+            for (const candidate of candidates) {
+                if (candidate.votes > maxVotes) {
+                    maxVotes = candidate.votes;
+                    winner = candidate;
+                }
+            }
+            
+            // Show winner if there is one
+            if (winner && maxVotes > 0) {
+                document.getElementById('winner-name').textContent = winner.name;
+                document.getElementById('winner-section').classList.remove('hidden');
+            } else {
+                document.getElementById('winner-section').classList.add('hidden');
+            }
+            
+            document.getElementById('results-section').classList.remove('hidden');
+            document.querySelector('.tab:nth-child(3)').classList.add('active');
+        }
+        
+        // Reset voting
+        function resetVoting() {
+            if (confirm('Are you sure you want to reset all voting data? This cannot be undone.')) {
+                // Reset candidates
+                for (const candidate of candidates) {
+                    candidate.votes = 0;
+                }
+                
+                // Reset voters
+                for (const voter of voters) {
+                    voter.voted = false;
+                }
+                
+                saveData();
+                showResults();
+                alert('Voting data has been reset');
+            }
+        }
+        
+        // Add sample voters (for demo purposes)
+        function addSampleVoters() {
+            const sampleVoters = [
+                { name: "elizabeth wandera", admission: "0001", voted: false },
+                { name: "augustine mutua", admission: "0001", voted: false },
+                { name: "musab said", admission: "0001", voted: false },
+                { name: "ndinda kiminza", admission: "0001", voted: false },
+                { name: "milton mwakio", admission: "0001", voted: false }
+            ];
+            
+            voters = [...voters, ...sampleVoters];
+            saveData();
+            alert('Sample voters added successfully');
+        }
+        
+        // Initialize the application
+        function init() {
+            loadData();
+            showTab('voter');
+        }
+        
+        // Run initialization when page loads
+        window.onload = init;
+    </script>
+</body>
+</html>
